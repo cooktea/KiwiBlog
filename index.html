@@ -10,6 +10,16 @@
     <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <script src="http://mockjs.com/dist/mock.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <script src="js/mymock.js"></script>
+    <style>
+        .article-img{
+            width: 80%;
+            max-height: 200px;
+            margin-left: 10%;
+            margin-right: 10%
+        }
+    </style>
+
 </head>
 <body>
     <div class="container">
@@ -45,7 +55,7 @@
             <div class="col-sm-8">
                 <h3>最近动态</h3>
                 <div>
-                    <ul id="actions">
+                    <ul id="news">
                         <li v-for="item in items">
                             <span>{{item.date}}</span>
                             <p>{{item.content}}</p>
@@ -54,33 +64,96 @@
                 </div>
             </div>
         </div>
-
+        <br>
+        <div class="row" id="articles">
+            <div class="col-sm-4 col-xs-12 article" style="height:350px" v-for="article in articles">
+                <a :href="article.src" target="_blank"><h4 style="display: -webkit-box;
+                    -webkit-box-orient: vertical;
+                    -webkit-line-clamp: 1;
+                    overflow: hidden;">{{article.title}}</h4></a>
+                <img v-if="article.image" :src="article.image" class="img-responsive article-img" height="200px">
+                <p style="
+                min-height: 50px;
+                display: -webkit-box;
+                -webkit-box-orient: vertical;
+                -webkit-line-clamp: 3;
+                overflow: hidden;">{{article.content}}</p>
+                <div class="row">
+                    <div class="col-xs-8">
+                            <a v-for="tag in article.tags" :href="tag.src"><span class="label label-info" style="margin: 5px" >{{tag.type}}</span></a>
+                    </div>
+                    <div class="col-xs-4">
+                        {{article.date}}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div>
+            <button onclick="getArticles()">More</button>
+        </div>
     </div>
 
-    <script>    
-        // Mock响应模板
-        Mock.mock('http://test.com', {
-            "action|1-3":[{
-                "date":"@date(yyyy-MM-dd)",
-                "content":"something"
-            }]
+
+    <script>
+        var allArticles;
+
+        $(document).ready(function(){
+            getNews();
+            getArticles();
         });
 
+        function getNews(){
+            $.ajax({
+                url: 'http://test.com/getNews',
+                type: 'get',
+                dataType: 'json'
+            }).done(function(data, status, xhr) {
+                console.log(data.news)
+                var news = new Vue({
+                el:"#news",
+                data:{
+                    items:data.news
+                }
+            })
+            });
+        }
 
-        $.ajax({
-            url: 'http://test.com',
-            type: 'get',
-            dataType: 'json'
-        }).done(function(data, status, xhr) {
-            console.log(data.action)
-            var example = new Vue({
-            el:"#actions",
-            data:{
-                items:data.action
+        function getArticles(){
+            $.ajax({
+                url:'http://test.com/getArticles',
+                type:'get',
+                dataType:'json'
+            }).done(function(data,status,xhr){
+                console.log(allArticles)
+                if(allArticles == undefined){
+                    allArticles = data.articles
+                } else{
+                    allArticles = mergeJson(allArticles,data.articles)
+                }
+                console.log(allArticles)
+                refreshArticles()
+            })
+        }
+
+        function refreshArticles(){
+            var getArticles = new Vue({
+                el:'#articles',
+                data:{
+                    articles:allArticles
+                }
+            })
+            for(var i=0;i<allArticles.length;i++){
+                Vue.set(getArticles.articles,i,allArticles[i]);
             }
-        })
-        });
+        }
 
+        function mergeJson(json1,json2){
+            var base = json1.length;
+            for(var index=0;index<json2.length;index++){
+                json1[index+base] = json2[index]
+            }
+            return json1;
+        }
 
     </script>
 </body>
