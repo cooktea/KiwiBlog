@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Index</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="http://mockjs.com/dist/mock.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.js"></script>
+    <script src="js/mymock.js"></script>
+
+
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <nav class="navbar navbar-default" role="navigation">
+                <div class="container-fluid">
+                    <div class="navbar-header">
+                        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+                            <span class="glyphicon glyphicon-th-list" style="color: rgb(37, 45, 69); font-size: 17px;">More</span>
+                        </button>
+                        <a href="index.html" class="navbar-brand" style="color: black">KiwiBlog</a>
+                    </div>
+                    <div class="collapse navbar-collapse" id="myNavbar">
+                        <ul class="nav navbar-nav">
+                            <li><a class="active" href="index.html">首页</a></li>
+                            <li><a href="blogs.html" target="_blank">全部文章</a></li>
+                            <li><a href="aboutMe.html" target="_blank">关于我</a></li>
+                            <li><a href="https://github.com/cooktea" target="_blank">Github</a></li>                    
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+        </div>
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="row" style="display: flex;justify-content: center;align-items: center">
+                    <div class="col-xs-12 col-md-4">
+                        <h3>文章分类</h3>
+                    </div>
+                    <div class="col-xs-12 col-md-8">
+                        <div class="input-group">
+                            <input text="text" class="form-control" placeholder="你想看什么文章呀">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button">Find!</button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <row class="row" id="type">
+                    <div class="col-xs-4 col-md-2" v-for="type in types" style="display: flex;justify-content: center;align-items: center">
+                        <a href="javascript:void(0)" onclick="showArticles(this)">{{type.name}}</a>
+                    </div>
+                </row>
+            </div>
+        </div>
+        <hr>
+        <div class="row" id="articles">
+                <div class="col-sm-4 col-xs-12 article" style="height:350px" v-for="article in articles">
+                    <a :href="article.src" target="_blank"><h4 style="display: -webkit-box;
+                        -webkit-box-orient: vertical;
+                        -webkit-line-clamp: 1;
+                        overflow: hidden;">{{article.title}}</h4></a>
+                    <img v-if="article.image" :src="article.image" class="img-responsive article-img" height="200px"
+                        style=" width: 80%;
+                                max-height: 200px;
+                                margin-left: 10%;
+                                margin-right: 10%">
+                    <p style="
+                    min-height: 50px;
+                    display: -webkit-box;
+                    -webkit-box-orient: vertical;
+                    -webkit-line-clamp: 3;
+                    overflow: hidden;">{{article.content}}</p>
+                    <div class="row">
+                        <div class="col-xs-8">
+                                <a v-for="tag in article.tags" :href="tag.src"><span class="label label-info" style="margin: 5px" >{{tag.type}}</span></a>
+                        </div>
+                        <div class="col-xs-4">
+                            {{article.date}}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xs-12" style="height: 50px;display: flex;justify-content: center;align-items: center;margin-bottom: 30px;font-size: 18px">
+                    <a href="javascript:void(0)" onclick="getMoreArticles()">More Articles</a>
+                </div>
+            </div>
+    </div>
+
+    <script>
+        var pageData = {
+            Articles:[],
+            articlesType:"all"
+        }
+
+        var vueArticles;
+
+        function showArticles(item){
+            pageData.articlesType = item.text
+            console.log(pageData.articlesType)
+        }
+
+        function initArticleTypes(){
+            $.ajax({
+                url:'http://text.com/getArticleTypes',
+                type:'get',
+                dataType:'json'
+            }).done(function(data){
+                var vueTypes = new Vue({
+                    el:"#type",
+                    data:{
+                        types:data.types
+                    }
+                })
+            })
+        }
+
+        function initArticles(){
+            vueArticles = new Vue({
+                el:'#articles',
+                data:{
+                    articles:pageData.Articles
+                },
+                methods:{
+                    getMoreArticles() {
+                        for(var i=0;i<pageData.Articles.length;i++){
+                            Vue.set(this.articles,i,pageData.Articles[i])
+                        }
+                    }
+                }
+            })
+            getArticles(vueArticles.getMoreArticles);
+        }
+                                                                                
+        function getMoreArticles(){
+            getArticles(vueArticles.getMoreArticles);
+        }
+
+        function getArticles(mycallback){
+            $.ajax({
+                url:'http://test.com/getArticles',
+                data:{
+                    articlesType:pageData.articlesType
+                },
+                type:'get',
+                dataType:'json'
+            }).done(function(data,status,xhr){
+                console.log(pageData.Articles)
+                mergeJson(pageData.Articles,data.articles)
+                console.log(pageData.Articles)      
+                mycallback();
+            })
+        }
+
+        function mergeJson(json1,json2){
+            var base = json1.length;
+            for(var index=0;index<json2.length;index++){
+                json1[index+base] = json2[index]
+            }
+            return json1;
+        }
+
+        $(document).ready(function(){
+            initArticleTypes();
+            initArticles();
+        })
+
+
+    </script>
+
+</body>
