@@ -9,7 +9,7 @@ Mock.mock('http://test.com/getNews', {
     }]
 });
 Mock.mock('http://test.com/getArticles',{
-    "articles|10":[{
+    "articles|12":[{
         "date":"@date(yyyy-MM-dd)",
         "title":"@title",
         "content":"@sentence",

@@ -9,7 +9,7 @@
     <script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
     <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <script src="http://mockjs.com/dist/mock.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.js"></script>
     <script src="js/mymock.js"></script>
     <style>
         .article-img{
@@ -87,28 +87,66 @@
                     </div>
                 </div>
             </div>
-        </div>
-        <div>
-            <button onclick="getArticles()">More</button>
+            <div class="col-xs-12" style="height: 50px;display: flex;justify-content: center;align-items: center;margin-bottom: 30px;font-size: 18px">
+                <a href="javascript:void(0)" onclick="getMoreArticles()">More Articles</a>
+            </div>
         </div>
     </div>
 
 
     <script>
-        var allArticles;
+        var pageData = {
+            Articles:[]
+        }
+        var vueArticles;
+
+        function initArticles(){
+            console.log(pageData.Articles);
+            vueArticles = new Vue({
+                el:'#articles',
+                data:{
+                    articles:pageData.Articles
+                },
+                methods:{
+                    getMoreArticles() {
+                        for(var i=0;i<pageData.Articles.length;i++){
+                            Vue.set(this.articles,i,pageData.Articles[i])
+                        }
+                    }
+                }
+            })
+            getArticles(vueArticles.getMoreArticles);
+        }
+
+        function getMoreArticles(){
+            getArticles(vueArticles.getMoreArticles);
+        }
+
+        function getArticles(mycallback){
+            $.ajax({
+                url:'http://test.com/getArticles',
+                type:'get',
+                dataType:'json'
+            }).done(function(data,status,xhr){
+                console.log(pageData.Articles)
+                mergeJson(pageData.Articles,data.articles)
+                console.log(pageData.Articles)      
+                mycallback();
+            })
+        
+        }
 
         $(document).ready(function(){
-            getNews();
-            getArticles();
+            initNews();
+            initArticles();
         });
 
-        function getNews(){
+        function initNews(){
             $.ajax({
                 url: 'http://test.com/getNews',
                 type: 'get',
                 dataType: 'json'
             }).done(function(data, status, xhr) {
-                console.log(data.news)
                 var news = new Vue({
                 el:"#news",
                 data:{
@@ -116,35 +154,6 @@
                 }
             })
             });
-        }
-
-        function getArticles(){
-            $.ajax({
-                url:'http://test.com/getArticles',
-                type:'get',
-                dataType:'json'
-            }).done(function(data,status,xhr){
-                console.log(allArticles)
-                if(allArticles == undefined){
-                    allArticles = data.articles
-                } else{
-                    allArticles = mergeJson(allArticles,data.articles)
-                }
-                console.log(allArticles)
-                refreshArticles()
-            })
-        }
-
-        function refreshArticles(){
-            var getArticles = new Vue({
-                el:'#articles',
-                data:{
-                    articles:allArticles
-                }
-            })
-            for(var i=0;i<allArticles.length;i++){
-                Vue.set(getArticles.articles,i,allArticles[i]);
-            }
         }
 
         function mergeJson(json1,json2){
