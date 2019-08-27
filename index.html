@@ -19,7 +19,6 @@
             margin-right: 10%
         }
     </style>
-
 </head>
 <body>
     <div class="container">
@@ -88,7 +87,7 @@
                 </div>
             </div>
             <div class="col-xs-12" style="height: 50px;display: flex;justify-content: center;align-items: center;margin-bottom: 30px;font-size: 18px">
-                <a href="javascript:void(0)" onclick="getMoreArticles()">More Articles</a>
+                <a href="javascript:void(0)" onclick="getMoreArticles(this)">More Articles</a>
             </div>
         </div>
     </div>
@@ -96,7 +95,8 @@
 
     <script>
         var pageData = {
-            Articles:[]
+            Articles:[],
+            pageIndex:1
         }
         var vueArticles;
 
@@ -118,13 +118,22 @@
             getArticles(vueArticles.getMoreArticles);
         }
                                                                                 
-        function getMoreArticles(){
-            getArticles(vueArticles.getMoreArticles);
+        function getMoreArticles(item){
+            item.text = "Waitting"
+            getArticles(function(){
+                vueArticles.getMoreArticles();
+                item.text = "More Articles"                
+            });
         }
 
         function getArticles(mycallback){
             $.ajax({
                 url:'http://test.com/getArticles',
+                data:{
+                    index:pageData.pageIndex,
+                    type:"最新",
+                    keyWord:"all"
+                },
                 type:'get',
                 dataType:'json'
             }).done(function(data,status,xhr){
@@ -132,6 +141,7 @@
                 mergeJson(pageData.Articles,data.articles)
                 console.log(pageData.Articles)      
                 mycallback();
+                pageData.pageIndex++;
             })
         }
 

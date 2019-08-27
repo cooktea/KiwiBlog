@@ -44,22 +44,25 @@
                     </div>
                     <div class="col-xs-12 col-md-8">
                         <div class="input-group">
-                            <input text="text" class="form-control" placeholder="你想看什么文章呀">
+                            <input id="search" text="text" class="form-control" placeholder="Searching">
                             <span class="input-group-btn">
-                                <button class="btn btn-default" type="button">Find!</button>
+                                <button class="btn btn-default" type="button" onclick="SearchArticles()">Find!</button>
                             </span>
                         </div>
                     </div>
                 </div>
-                <row class="row" id="type">
+                <div class="row" id="type">
                     <div class="col-xs-4 col-md-2" v-for="type in types" style="display: flex;justify-content: center;align-items: center">
                         <a href="javascript:void(0)" onclick="showArticles(this)">{{type.name}}</a>
                     </div>
-                </row>
+                </div>
             </div>
         </div>
         <hr>
         <div class="row" id="articles">
+                <div class="col-xs-12">
+                    <h3>{{ArticleType}}</h3>
+                </div>
                 <div class="col-sm-4 col-xs-12 article" style="height:350px" v-for="article in articles">
                     <a :href="article.src" target="_blank"><h4 style="display: -webkit-box;
                         -webkit-box-orient: vertical;
@@ -86,7 +89,7 @@
                     </div>
                 </div>
                 <div class="col-xs-12" style="height: 50px;display: flex;justify-content: center;align-items: center;margin-bottom: 30px;font-size: 18px">
-                    <a href="javascript:void(0)" onclick="getMoreArticles()">More Articles</a>
+                    <a href="javascript:void(0)" onclick="getMoreArticles(this)">More Articles</a>
                 </div>
             </div>
     </div>
@@ -94,14 +97,35 @@
     <script>
         var pageData = {
             Articles:[],
-            articlesType:"all"
+            articlesType:"最新",
+            pageIndex :1,
+            findArticles:"all"
         }
 
         var vueArticles;
 
+        function SearchArticles(){
+            pageData.findArticles = $("#search").val()==""?"all":$("#search").val()
+            console.log(pageData.findArticles)
+        }
+
         function showArticles(item){
             pageData.articlesType = item.text
-            console.log(pageData.articlesType)
+            vueArticles.ArticleType = pageData.articlesType
+            pageData.pageIndex = 1
+            $.ajax({
+                url:'http://test.com/getArticles',
+                data:{
+                    articlesType:pageData.articlesType,
+                    index:pageData.pageIndex,
+                    keyWord:pageData.findArticles
+                },
+                type:'get',
+                dataType:'json'
+            }).done(function(data,status,xhr){
+                pageData.Articles = data.articles
+                vueArticles.articles = pageData.Articles
+            })
         }
 
         function initArticleTypes(){
@@ -123,7 +147,8 @@
             vueArticles = new Vue({
                 el:'#articles',
                 data:{
-                    articles:pageData.Articles
+                    ArticleType:pageData.articlesType,
+                    articles:pageData.Articles,
                 },
                 methods:{
                     getMoreArticles() {
@@ -136,15 +161,14 @@
             getArticles(vueArticles.getMoreArticles);
         }
                                                                                 
-        function getMoreArticles(){
-            getArticles(vueArticles.getMoreArticles);
-        }
-
         function getArticles(mycallback){
+            console.log(pageData.pageIndex)
             $.ajax({
                 url:'http://test.com/getArticles',
                 data:{
-                    articlesType:pageData.articlesType
+                    articlesType:pageData.articlesType,
+                    index:pageData.pageIndex,
+                    keyWord:pageData.findArticles
                 },
                 type:'get',
                 dataType:'json'
@@ -152,7 +176,8 @@
                 console.log(pageData.Articles)
                 mergeJson(pageData.Articles,data.articles)
                 console.log(pageData.Articles)      
-                mycallback();
+                mycallback()
+                pageData.pageIndex++
             })
         }
 
@@ -162,6 +187,14 @@
                 json1[index+base] = json2[index]
             }
             return json1;
+        }
+
+        function getMoreArticles(item){
+            item.text = "Waitting"
+            getArticles(function(){
+                vueArticles.getMoreArticles();
+                item.text = "More Articles"                
+            });
         }
 
         $(document).ready(function(){

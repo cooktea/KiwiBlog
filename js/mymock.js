@@ -14,24 +14,11 @@ Mock.mock('http://test.com/getNews', {
         "content":"@sentence(40)"
     }]
 });
-// Mock.mock(/test.com\/getArticles/,{
-//     "articles|12":[{
-//         "date":"@date(yyyy-MM-dd)",
-//         "title":"@title",
-//         "content":"@sentence",
-//         "image":"@image(200x400)",
-//         "src":Mock.Random.url("http"),
-//         "tags|1-3":[{
-//             "type":"@word",
-//             "src":"@url(http)"
-//         }]
-//     }]
-// })
 
 Mock.mock(/test.com\/getArticles/,function(option){
     console.log(option)
     return Mock.mock({
-        "articles|12":[{
+        "articles|9":[{
             "date":"@date(yyyy-MM-dd)",
             "title":"@title",
             "content":"@sentence",
