@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Statistic</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="http://mockjs.com/dist/mock.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.js"></script>
+    <script src="https://cdn.bootcss.com/echarts/4.3.0-rc.1/echarts-en.common.min.js"></script>
+    <script src="js/mymock.js"></script>
+    <style>
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <nav class="navbar navbar-default" role="navigation">
+                <div class="container-fluid">
+                    <div class="navbar-header">
+                        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+                            <span class="glyphicon glyphicon-th-list" style="color: rgb(37, 45, 69); font-size: 17px;">More</span>
+                        </button>
+                        <a href="index.html" class="navbar-brand" style="color: black">KiwiBlog</a>
+                    </div>
+                    <div class="collapse navbar-collapse" id="myNavbar">
+                        <ul class="nav navbar-nav">
+                            <li><a class="active" href="index.html">首页</a></li>
+                            <li><a href="blogs.html" target="_blank">全部文章</a></li>
+                            <li><a href="aboutMe.html" target="_blank">关于我</a></li>
+                            <li><a href="https://github.com/cooktea" target="_blank">Github</a></li>                    
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+        </div>
+        <div class="row">
+            <h3>日浏览量</h3>
+            <div id="dayInfo" class="col-xs-12" style="height: 400px"></div>
+        </div>
+        <div class="row">
+            <h3>月浏览量</h3>
+            <div id="monthInfo" class="col-xs-12" style="height: 400px"></div>
+        </div>
+        <div class="row">
+            <h3>年浏览量</h3>
+            <div id="yearInfo" class="col-xs-12" style="height: 400px"></div>
+        </div>
+    </div>
+
+
+    <script>
+        var datas = {
+            dayInfo:{
+                date:[],
+                counts:[]
+            }
+            ,
+            monthInfo:{
+                date:[],
+                counts:[]
+            },
+            yearInfo:{
+                date:[],
+                counts:[]
+            }
+        }
+
+        $(document).ready(function(){
+            getData();
+        })
+
+        function getData(){
+            $.ajax({
+                url:"http://test.com/getStatistic",
+                type:'get',
+                dataType:"json"
+            }).done(function(data){
+                console.log(data)
+                for(var i=0;i<7;i++){
+                    datas.dayInfo.date[i] = data.dayInfo[i].date;
+                    datas.dayInfo.counts[i] = data.dayInfo[i].count
+                    datas.monthInfo.date[i] = data.monthInfo[i].date;
+                    datas.monthInfo.counts[i] = data.monthInfo[i].count
+                    datas.yearInfo.date[i] = data.yearInfo[i].date;
+                    datas.yearInfo.counts[i] = data.yearInfo[i].count
+                }
+                initDayInfo();
+                initMonthInfo();
+                initYearInfo();
+                console.log(datas)
+            })
+        }
+        function initDayInfo(){
+            var mychart = echarts.init(document.getElementById('dayInfo'));
+            var option = {
+                title:{
+                },
+                tooltip: {},
+                legend: {
+                    data:['访问量']
+                },
+                xAxis: {
+                    data:datas.dayInfo.date
+                },
+                yAxis: {},
+                series: [{
+                    name: '访问量',
+                    type: 'bar',
+                    data: datas.dayInfo.counts
+                }]
+            }
+            mychart.setOption(option);
+        }
+        function initMonthInfo(){
+            var mychart = echarts.init(document.getElementById('monthInfo'));
+            var option = {
+                title:{
+                },
+                tooltip: {},
+                legend: {
+                    data:['访问量']
+                },
+                xAxis: {
+                    data:datas.monthInfo.date
+                },
+                yAxis: {},
+                series: [{
+                    name: '访问量',
+                    type: 'bar',
+                    data: datas.monthInfo.counts
+                }]
+            }
+            mychart.setOption(option);
+        }
+        function initYearInfo(){
+            var mychart = echarts.init(document.getElementById('yearInfo'));
+            var option = {
+                title:{
+                },
+                tooltip: {},
+                legend: {
+                    data:['访问量']
+                },
+                xAxis: {
+                    data:datas.yearInfo.date
+                },
+                yAxis: {},
+                series: [{
+                    name: '访问量',
+                    type: 'bar',
+                    data: datas.yearInfo.counts
+                }]
+            }
+            mychart.setOption(option);
+        }
+
+    </script>
+</body>
+</html>

@@ -1,6 +1,22 @@
 Mock.setup({
     timeout:"1000-2000"
 })
+// 获取统计信息
+Mock.mock('http://test.com/getStatistic',{
+    "dayInfo|7":[{
+        "date":"@date(MM-dd)",
+        "count|0-1000":100
+    }],
+    "monthInfo|7":[{
+        "date":"@date(yyyy-MM)",
+        "count|0-30000":100
+    }],
+    "yearInfo|7":[{
+        "date":"@date(yyyy)",
+        "count|0-365000":100
+    }]
+})
+
 // 获取文章的分类
 Mock.mock('http://text.com/getArticleTypes',{
     "types|4-10":[{
