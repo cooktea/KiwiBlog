@@ -39,16 +39,13 @@
             </nav>
         </div>
         <div class="row">
-            <h3>日浏览量</h3>
-            <div id="dayInfo" class="col-xs-12" style="height: 400px"></div>
+            <div id="dayInfo" class="col-xs-12 col-md-6" style="height: 300px"></div>
+            <div id="yearInfo" class="col-xs-12 col-md-6" style="height: 300px"></div>
         </div>
         <div class="row">
-            <h3>月浏览量</h3>
-            <div id="monthInfo" class="col-xs-12" style="height: 400px"></div>
+            <div id="monthInfo" class="col-xs-12" style="height: 300px"></div>
         </div>
         <div class="row">
-            <h3>年浏览量</h3>
-            <div id="yearInfo" class="col-xs-12" style="height: 400px"></div>
         </div>
     </div>
 
@@ -81,11 +78,15 @@
                 dataType:"json"
             }).done(function(data){
                 console.log(data)
-                for(var i=0;i<7;i++){
+                for(var i=0;i<data.dayInfo.length;i++){
                     datas.dayInfo.date[i] = data.dayInfo[i].date;
                     datas.dayInfo.counts[i] = data.dayInfo[i].count
+                }
+                for(var i=0;i<data.monthInfo.length;i++){
                     datas.monthInfo.date[i] = data.monthInfo[i].date;
                     datas.monthInfo.counts[i] = data.monthInfo[i].count
+                }
+                for(var i=0;i<data.yearInfo.length;i++){
                     datas.yearInfo.date[i] = data.yearInfo[i].date;
                     datas.yearInfo.counts[i] = data.yearInfo[i].count
                 }
@@ -99,6 +100,7 @@
             var mychart = echarts.init(document.getElementById('dayInfo'));
             var option = {
                 title:{
+                    text:"日浏览量"
                 },
                 tooltip: {},
                 legend: {
@@ -120,6 +122,7 @@
             var mychart = echarts.init(document.getElementById('monthInfo'));
             var option = {
                 title:{
+                    text:"月浏览量"
                 },
                 tooltip: {},
                 legend: {
@@ -141,6 +144,7 @@
             var mychart = echarts.init(document.getElementById('yearInfo'));
             var option = {
                 title:{
+                    text:"年浏览量"
                 },
                 tooltip: {},
                 legend: {
